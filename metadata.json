@@ -1,0 +1,6 @@
+{
+  "name": "CampusHub",
+  "description": "An all-in-one platform for university life, featuring community hubs, a marketplace, campus directory, and academics tracker.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
