@@ -5,7 +5,10 @@ export const UserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   role: z.enum(['student', 'faculty', 'admin']),
-  avatarUrl: z.string().optional(),
+  avatar: z.string().optional(),
+  department: z.string().optional(),
+  semester: z.number().optional(),
+  registrationNumber: z.string().optional(),
   joinedAt: z.date(),
 });
 

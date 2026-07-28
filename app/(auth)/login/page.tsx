@@ -1,32 +1,56 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { userService } from '@/services/user.service';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Input } from '@/components/ui/input';
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const login = useAuth((state) => state.login);
+  const { login, isAuthenticated } = useAuth();
+  
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => setIsClient(true), []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: 'password123',
+    },
+  });
+
+  useEffect(() => {
+    if (isClient && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isClient, isAuthenticated, router]);
+
+  const onSubmit = async (data: LoginFormValues) => {
     setError('');
     
     try {
-      const user = await userService.authenticateUser(email);
+      const user = await userService.authenticateUser(data.email);
       login(user);
       router.push('/dashboard');
     } catch (err) {
       setError('Invalid credentials. Try student@iter.edu');
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (!isClient) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
@@ -35,38 +59,44 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground text-sm">Enter your credentials to access ITER Sync</p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none" htmlFor="email">
               Email
             </label>
-            <input
+            <Input
               id="email"
               type="email"
               placeholder="student@iter.edu"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              {...form.register('email')}
             />
+            {form.formState.errors.email && (
+              <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none" htmlFor="password">
               Password
             </label>
-            <input
+            <Input
               id="password"
               type="password"
-              required
-              defaultValue="password123"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              {...form.register('password')}
             />
+            {form.formState.errors.password && (
+              <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
+            )}
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
+        
+        <div className="mt-4 text-xs text-muted-foreground text-center">
+          <p>Demo accounts:</p>
+          <p>student@iter.edu | faculty@iter.edu | admin@iter.edu</p>
+        </div>
       </div>
     </div>
   );

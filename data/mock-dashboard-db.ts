@@ -1,0 +1,85 @@
+import { DashboardData } from '@/types/dashboard';
+
+export const mockDashboardData: DashboardData = {
+  stats: {
+    attendance: 85.5,
+    cgpa: 8.4,
+    currentCredits: 24,
+    pendingAssignments: 3,
+    upcomingExams: 2,
+    unreadNotifications: 5,
+  },
+  schedule: [
+    {
+      id: '1',
+      subject: 'Data Structures and Algorithms',
+      faculty: 'Dr. Jane Smith',
+      room: 'LT-102',
+      startTime: '09:00 AM',
+      endTime: '10:30 AM',
+      status: 'completed',
+    },
+    {
+      id: '2',
+      subject: 'Database Management Systems',
+      faculty: 'Prof. Alan Turing',
+      room: 'Lab-4',
+      startTime: '11:00 AM',
+      endTime: '01:00 PM',
+      status: 'ongoing',
+    },
+    {
+      id: '3',
+      subject: 'Operating Systems',
+      faculty: 'Dr. Linus Torvalds',
+      room: 'LT-105',
+      startTime: '02:00 PM',
+      endTime: '03:30 PM',
+      status: 'upcoming',
+    },
+  ],
+  activities: [
+    {
+      id: '1',
+      title: 'Attendance Updated',
+      description: 'You were marked present for Data Structures.',
+      timestamp: new Date(new Date().getTime() - 1000 * 60 * 30),
+      type: 'attendance',
+    },
+    {
+      id: '2',
+      title: 'Assignment Uploaded',
+      description: 'DBMS Project Phase 1 submitted successfully.',
+      timestamp: new Date(new Date().getTime() - 1000 * 60 * 60 * 2),
+      type: 'assignment',
+    },
+    {
+      id: '3',
+      title: 'Exam Scheduled',
+      description: 'Mid-term schedule published for Operating Systems.',
+      timestamp: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+      type: 'exam',
+    },
+  ],
+  announcements: [
+    {
+      id: '1',
+      title: 'Tech Fest 2026 Registration Open',
+      content: 'Register for the upcoming technical festival. Lots of exciting events!',
+      date: new Date(),
+      isPinned: true,
+      isPriority: true,
+      author: 'Student Council',
+    },
+    {
+      id: '2',
+      title: 'Library Working Hours Extended',
+      content: 'The central library will remain open until midnight during exam weeks.',
+      date: new Date(new Date().getTime() - 1000 * 60 * 60 * 48),
+      isPinned: false,
+      isPriority: false,
+      author: 'Library Admin',
+    },
+  ],
+  quote: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+};

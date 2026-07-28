@@ -3,6 +3,9 @@ export interface User {
   name: string;
   email: string;
   role: 'student' | 'faculty' | 'admin';
-  avatarUrl?: string;
+  avatar?: string;
+  department?: string;
+  semester?: number;
+  registrationNumber?: string;
   joinedAt: Date;
 }
