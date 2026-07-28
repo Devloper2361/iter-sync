@@ -10,8 +10,26 @@ export function useClubs() {
 
 export function useClub(id: string) {
   return useQuery({
-    queryKey: ['club', id],
-    queryFn: () => clubService.getClub(id),
+    queryKey: ['clubs', id],
+    queryFn: () => clubService.getClubById(id),
     enabled: !!id,
+  });
+}
+
+export function useClubMembers(clubId: string) {
+  return useQuery({
+    queryKey: ['clubs', clubId, 'members'],
+    queryFn: () => clubService.getClubMembers(clubId),
+    enabled: !!clubId,
+  });
+}
+
+
+
+export function useClubPosts(clubId: string) {
+  return useQuery({
+    queryKey: ['clubs', clubId, 'posts'],
+    queryFn: () => clubService.getClubPosts(clubId),
+    enabled: !!clubId,
   });
 }

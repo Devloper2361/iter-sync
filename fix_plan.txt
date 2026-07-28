@@ -1,0 +1,18 @@
+1. Root Cause
+The root cause stems from two layout architecture flaws:
+A) Flexbox `max-height` resolution failure: The `DialogContent` was set to `flex flex-col max-h-[90vh]`, with `DialogHeader` and `<form>` as siblings. In CSS flexbox, when a parent has a `max-height` but no explicit `height` (like `h-full` or `h-[90vh]`), flex-children (the `<form>`) often fail to calculate their flex-shrink threshold accurately. Instead of shrinking, the form expands to its intrinsic height, overflowing the 90vh bound. Because `DialogContent` has `overflow-hidden`, the bottom of the form (the Footer) gets clipped/detached.
+B) Broken nested flex height in Step 2: The inner container for Step 2 (`<div className="flex flex-col h-full gap-5">`) was placed inside a `<div className="p-6">` which has an intrinsic `auto` height. Applying `h-full` to a child whose parent has an `auto` height invalidates the height constraint, causing the nested `flex-1 overflow-y-auto` user list to grow indefinitely rather than scroll.
+
+2. File(s) responsible
+- `components/community/study-groups/create-group-dialog.tsx`
+
+3. Why previous fixes failed
+Previous fixes attempted to solve the overflow by applying CSS constraints directly to the `DialogContent` wrapper and tweaking gap/padding logic, but they failed to alter the underlying DOM tree hierarchy. As long as `DialogHeader` and `<form>` remained siblings within a `max-h` flex container, and Step 2 retained its invalid `h-full` instruction, the CSS rendering engine continued to struggle with height resolution, causing the footer clipping and incorrect scrollbar positioning.
+
+4. The correct solution
+- Re-architect the DOM tree so that the `<form>` is the ONLY child of `DialogContent`. 
+- Make the `<form>` the flex container driving the layout: `className="flex flex-col max-h-[90vh]"`.
+- Place `DialogHeader` inside the form as a `shrink-0` element.
+- Place the form body as `flex-1 overflow-y-auto p-6 min-h-0`. This guarantees the scrollbar is strictly scoped to the body, starting below the header.
+- Place the footer as a `shrink-0` element at the bottom.
+- Remove the invalid `h-full` from Step 2 and replace nested `flex-1` scrolling with a fixed `max-h-[300px]` constraint for the user list, or let the outer form body handle all scrolling.

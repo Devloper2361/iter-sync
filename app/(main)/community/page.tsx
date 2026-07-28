@@ -8,8 +8,34 @@ import { ClubsTab } from '@/components/community/clubs-tab';
 import { CommunitySearch } from '@/components/community/community-search';
 import { CommunityNotifications } from '@/components/community/community-notifications';
 import { Rss, HelpCircle, Users, Tent } from 'lucide-react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
-export default function CommunityPage() {
+function CommunityContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const tabParam = searchParams.get('tab');
+  
+  const validTabs = ['feed', 'qa', 'groups', 'clubs'];
+  const defaultTab = validTabs.includes(tabParam as string) ? (tabParam as string) : 'feed';
+  
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  useEffect(() => {
+    if (tabParam && ['feed', 'qa', 'groups', 'clubs'].includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam, activeTab]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', value);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <div className="space-y-8 pb-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -26,32 +52,32 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="feed" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden border-b rounded-none bg-transparent p-0 h-auto gap-4">
           <TabsTrigger 
-            value="feed" 
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
+             value="feed" 
+             className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
           >
             <Rss className="w-4 h-4 mr-2" />
             Home Feed
           </TabsTrigger>
           <TabsTrigger 
-            value="qa" 
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
+             value="qa" 
+             className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
           >
             <HelpCircle className="w-4 h-4 mr-2" />
             Q&A Forum
           </TabsTrigger>
           <TabsTrigger 
-            value="groups" 
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
+             value="groups" 
+             className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
           >
             <Users className="w-4 h-4 mr-2" />
             Study Groups
           </TabsTrigger>
           <TabsTrigger 
-            value="clubs" 
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
+             value="clubs" 
+             className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-2 py-3 text-sm font-medium"
           >
             <Tent className="w-4 h-4 mr-2" />
             Clubs
@@ -75,5 +101,13 @@ export default function CommunityPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function CommunityPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-muted-foreground animate-pulse">Loading Community...</div>}>
+      <CommunityContent />
+    </Suspense>
   );
 }

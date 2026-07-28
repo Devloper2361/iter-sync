@@ -1,92 +1,97 @@
 "use client"
-
+import { useState } from 'react';
 import { useStudyGroup } from '@/hooks/use-study-groups';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Users, Clock, MapPin, Tag, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare, FileText, Users, CheckSquare, CalendarDays, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GroupHeader } from '@/components/community/group-details/group-header';
+import { GroupInfoSidebar } from '@/components/community/group-details/group-info-sidebar';
+import { DiscussionTab } from '@/components/community/group-details/discussion-tab';
+import { ResourcesTab } from '@/components/community/group-details/resources-tab';
+import { MembersTab } from '@/components/community/group-details/members-tab';
+import { TasksTab } from '@/components/community/group-details/tasks-tab';
+import { CalendarTab } from '@/components/community/group-details/calendar-tab';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 export default function GroupDetailsPage({ params }: { params: { id: string } }) {
   const { data: group, isLoading } = useStudyGroup(params.id);
+  const [showSidebar, setShowSidebar] = useState(false);
 
-  if (isLoading) return <div className="p-8 text-center">Loading group...</div>;
-  if (!group) return <div className="p-8 text-center text-destructive">Study group not found.</div>;
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6 pb-8 px-4 sm:px-6 mt-6 flex justify-center items-center min-h-[60vh]">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!group) return <div className="p-8 text-center text-destructive font-medium">Study group not found.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-8">
-      <Link href="/community" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Study Groups
-      </Link>
+    <div className="max-w-6xl mx-auto pb-8 px-2 sm:px-6 pt-4 sm:pt-6 h-[calc(100vh-4rem)] flex flex-col">
+      <div className="mb-4 shrink-0">
+        <Link href="/community?tab=groups" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Groups
+        </Link>
+      </div>
+      
+      <div className="flex flex-1 min-h-0 bg-background rounded-xl border shadow-sm overflow-hidden">
+        
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1 min-w-0 h-[70vh] max-h-[800px]">
+          
+          <GroupHeader group={group} onInfoClick={() => setShowSidebar(prev => !prev)} />
 
-      <Card className="border-t-4 border-primary">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">{group.name}</h1>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                <span>Created by {group.creator.name}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {group.membersCount} Members</span>
-              </div>
+          <Tabs defaultValue="chat" className="flex flex-col flex-1 min-h-0">
+            <div className="bg-muted/10 border-b shrink-0 px-2 sm:px-4">
+              <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden rounded-none bg-transparent p-0 h-auto gap-2 sm:gap-6 flex-nowrap scrollbar-hide py-1">
+                <TabsTrigger value="chat" className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+                  <MessageSquare className="w-4 h-4 mr-2" /> Chat
+                </TabsTrigger>
+                <TabsTrigger value="files" className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+                  <FileText className="w-4 h-4 mr-2 hidden sm:inline-block" /> Files
+                </TabsTrigger>
+                <TabsTrigger value="tasks" className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+                  <CheckSquare className="w-4 h-4 mr-2 hidden sm:inline-block" /> Tasks
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+                  <CalendarDays className="w-4 h-4 mr-2 hidden sm:inline-block" /> Calendar
+                </TabsTrigger>
+                <TabsTrigger value="members" className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+                  <Users className="w-4 h-4 mr-2 hidden sm:inline-block" /> Members
+                </TabsTrigger>
+              </TabsList>
             </div>
-            <Button variant={group.isJoinedByMe ? "secondary" : "default"}>
-              {group.isJoinedByMe ? 'Leave Group' : 'Join Group'}
-            </Button>
-          </div>
 
-          <div className="flex flex-wrap gap-2 mb-6">
-            {group.tags.map(tag => (
-              <span key={tag} className="text-xs bg-secondary px-2.5 py-1 rounded-full text-secondary-foreground font-medium flex items-center gap-1">
-                <Tag className="w-3 h-3" />
-                {tag}
-              </span>
-            ))}
-          </div>
+            <div className="flex-1 overflow-y-auto">
+              <TabsContent value="chat" className="h-full m-0 data-[state=inactive]:hidden border-0 shadow-none p-0 rounded-none">
+                <DiscussionTab groupId={group.id} />
+              </TabsContent>
+              <TabsContent value="files" className="h-full m-0 data-[state=inactive]:hidden p-4">
+                <ResourcesTab groupId={group.id} />
+              </TabsContent>
+              <TabsContent value="tasks" className="h-full m-0 data-[state=inactive]:hidden p-4">
+                <TasksTab groupId={group.id} />
+              </TabsContent>
+              <TabsContent value="calendar" className="h-full m-0 data-[state=inactive]:hidden p-4">
+                <CalendarTab groupId={group.id} />
+              </TabsContent>
+              <TabsContent value="members" className="h-full m-0 data-[state=inactive]:hidden p-4">
+                <MembersTab groupId={group.id} />
+              </TabsContent>
+            </div>
+          </Tabs>
 
-          <p className="text-muted-foreground leading-relaxed bg-muted/30 p-4 rounded-lg">
-            {group.description}
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Logistics</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3 text-sm">
-                <Clock className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <span className="font-semibold block">Meeting Time</span>
-                  <span className="text-muted-foreground">{group.meetingTime || 'TBD'}</span>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 text-sm">
-                <MapPin className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <span className="font-semibold block">Location</span>
-                  <span className="text-muted-foreground">{group.meetingLocation || 'TBD'}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Group Discussions</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center border-2 border-dashed rounded-lg m-6 mt-0">
-              <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-              <p>No active discussions yet.</p>
-              <Button variant="outline" className="mt-4">Start a discussion</Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Info Sidebar */}
+        {showSidebar && (
+          <div className="hidden md:block shrink-0 h-[70vh] max-h-[800px]">
+            <GroupInfoSidebar group={group} onClose={() => setShowSidebar(false)} />
+          </div>
+        )}
+
       </div>
     </div>
   );
