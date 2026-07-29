@@ -1,18 +1,28 @@
 "use client"
-import { useGroupEvents } from '@/hooks/use-study-groups';
+import { useState } from 'react';
+import { useGroupEvents, useUpdateGroupEvent, useDeleteGroupEvent, useGroupMembers } from '@/hooks/use-study-groups';
+import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CalendarPlus, CalendarDays, Clock, MapPin, Users, Loader2 } from 'lucide-react';
+import { CalendarPlus, CalendarDays, Clock, MapPin, Users, Loader2, MoreVertical, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { CreateEventDialog } from './create-event-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface CalendarTabProps {
   groupId: string;
 }
 
 export function CalendarTab({ groupId }: CalendarTabProps) {
+  const { user } = useAuth();
   const { data: events, isLoading } = useGroupEvents(groupId);
+  const { data: members } = useGroupMembers(groupId);
+  const updateEvent = useUpdateGroupEvent(groupId);
+  const deleteEvent = useDeleteGroupEvent(groupId);
+
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -30,11 +40,18 @@ export function CalendarTab({ groupId }: CalendarTabProps) {
     }
   };
 
+  const myRole = members?.find(m => m.author.id === user?.id)?.role;
+  const isAdmin = myRole === 'Admin' || myRole === 'Owner';
+
+  const handleToggleRSVP = (event: any) => {
+    updateEvent.mutate({ eventId: event.id, updates: { isJoinedByMe: !event.isJoinedByMe } });
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-semibold tracking-tight">Upcoming Events</h3>
-        <Button className="shadow-sm h-9" variant="outline">
+        <Button className="shadow-sm h-9" variant="outline" onClick={() => setCreateDialogOpen(true)}>
           <CalendarPlus className="w-4 h-4 mr-2" />
           Create Event
         </Button>
@@ -77,10 +94,38 @@ export function CalendarTab({ groupId }: CalendarTabProps) {
                     </div>
                   </div>
                   
-                  <div className="self-end sm:self-center">
-                    <Button variant={event.isJoinedByMe ? "secondary" : "outline"} size="sm" className="shadow-sm h-7 text-xs">
+                  <div className="self-end sm:self-center flex items-center gap-2">
+                    <Button 
+                      variant={event.isJoinedByMe ? "secondary" : "outline"} 
+                      size="sm" 
+                      className="shadow-sm h-7 text-xs"
+                      onClick={() => handleToggleRSVP(event)}
+                    >
                       {event.isJoinedByMe ? 'Attending' : 'RSVP'}
                     </Button>
+
+                    {(isAdmin || event.creator?.id === user?.id) && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this event?')) {
+                                deleteEvent.mutate(event.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </CardContent>
               </div>
@@ -94,6 +139,12 @@ export function CalendarTab({ groupId }: CalendarTabProps) {
           </div>
         )}
       </div>
+
+      <CreateEventDialog 
+        groupId={groupId}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
     </div>
   );
 }

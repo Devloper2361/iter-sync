@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { studyGroupService } from '@/services/study-group.service';
 import { getSocket } from '@/lib/socket';
-import { StudyGroup } from '@/types/community';
+import { StudyGroup, GroupResource, GroupTask, GroupEvent } from '@/types/community';
 
 export function useStudyGroups() {
   const queryClient = useQueryClient();
@@ -165,10 +165,189 @@ export function useGroupEvents(groupId: string) {
   });
 }
 
+export function useAddGroupEvent(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (eventData: Omit<GroupEvent, 'id' | 'creator' | 'isJoinedByMe'> & { creatorId?: string }) =>
+      studyGroupService.addEvent({
+        ...eventData,
+        creatorId: eventData.creatorId || 'u1',
+      }),
+    onSuccess: (newEvent) => {
+      queryClient.setQueryData(['study-group-events', groupId], (old: any) => {
+        if (!old) return [newEvent];
+        return [...old, newEvent].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      });
+    },
+  });
+}
+
+export function useUpdateGroupEvent(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ eventId, updates }: { eventId: string, updates: Partial<GroupEvent> }) =>
+      studyGroupService.updateEvent(groupId, eventId, updates),
+    onSuccess: (updatedEvent) => {
+      queryClient.setQueryData(['study-group-events', groupId], (old: any) => {
+        if (!old) return [];
+        return old.map((e: any) => e.id === updatedEvent.id ? updatedEvent : e);
+      });
+    },
+  });
+}
+
+export function useDeleteGroupEvent(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (eventId: string) =>
+      studyGroupService.deleteEvent(groupId, eventId),
+    onSuccess: (_, eventId) => {
+      queryClient.setQueryData(['study-group-events', groupId], (old: any) => {
+        if (!old) return [];
+        return old.filter((e: any) => e.id !== eventId);
+      });
+    },
+  });
+}
+
+export function useAddGroupMembers(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userIds: string[]) =>
+      studyGroupService.addMembers(groupId, userIds),
+    onSuccess: (newMembers) => {
+      queryClient.setQueryData(['study-group-members', groupId], (old: any) => {
+        if (!old) return newMembers;
+        return [...old, ...newMembers];
+      });
+    },
+  });
+}
+
+export function useUpdateMemberRole(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ memberId, role }: { memberId: string, role: 'Admin' | 'Member' | 'Owner' }) =>
+      studyGroupService.updateMemberRole(groupId, memberId, role),
+    onSuccess: (updatedMember) => {
+      queryClient.setQueryData(['study-group-members', groupId], (old: any) => {
+        if (!old) return [];
+        let newMembers = old.map((m: any) => m.id === updatedMember.id ? updatedMember : m);
+        // If owner changed, we need to downgrade the previous owner locally too, or rely on refetch.
+        // For simplicity, we can invalidate to refetch if Owner changed
+        if (updatedMember.role === 'Owner') {
+          queryClient.invalidateQueries({ queryKey: ['study-group-members', groupId] });
+        }
+        return newMembers;
+      });
+    },
+  });
+}
+
+export function useRemoveGroupMember(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (memberId: string) =>
+      studyGroupService.removeMember(groupId, memberId),
+    onSuccess: (_, memberId) => {
+      queryClient.setQueryData(['study-group-members', groupId], (old: any) => {
+        if (!old) return [];
+        return old.filter((m: any) => m.id !== memberId);
+      });
+    },
+  });
+}
+
 export function useGroupPosts(groupId: string) {
   return useQuery({
     queryKey: ['study-group-posts', groupId],
     queryFn: () => studyGroupService.getPosts(groupId),
     enabled: !!groupId,
+  });
+}
+
+export function useAddGroupResource(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (resourceData: Omit<GroupResource, 'id' | 'createdAt'>) =>
+      studyGroupService.addResource(resourceData),
+    onSuccess: (newResource) => {
+      queryClient.setQueryData(['study-group-resources', groupId], (old: any) => {
+        if (!old) return [newResource];
+        return [newResource, ...old];
+      });
+    },
+  });
+}
+
+export function useDeleteGroupResource(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (resourceId: string) =>
+      studyGroupService.deleteResource(groupId, resourceId),
+    onSuccess: (_, resourceId) => {
+      queryClient.setQueryData(['study-group-resources', groupId], (old: any) => {
+        if (!old) return [];
+        return old.filter((r: any) => r.id !== resourceId);
+      });
+    },
+  });
+}
+
+export function useAddGroupTask(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (taskData: Omit<GroupTask, 'id' | 'createdAt' | 'creator'> & { creatorId?: string }) =>
+      studyGroupService.addTask({
+        ...taskData,
+        creatorId: taskData.creatorId || 'u1',
+      }),
+    onSuccess: (newTask) => {
+      queryClient.setQueryData(['study-group-tasks', groupId], (old: any) => {
+        if (!old) return [newTask];
+        return [newTask, ...old];
+      });
+      const socket = getSocket();
+      socket.emit('TaskCreated', { task: newTask });
+    },
+  });
+}
+
+export function useUpdateGroupTask(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ taskId, updates }: { taskId: string, updates: Partial<GroupTask> }) =>
+      studyGroupService.updateTask(groupId, taskId, updates),
+    onSuccess: (updatedTask) => {
+      queryClient.setQueryData(['study-group-tasks', groupId], (old: any) => {
+        if (!old) return [];
+        return old.map((t: any) => t.id === updatedTask.id ? updatedTask : t);
+      });
+    },
+  });
+}
+
+export function useDeleteGroupTask(groupId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (taskId: string) =>
+      studyGroupService.deleteTask(groupId, taskId),
+    onSuccess: (_, taskId) => {
+      queryClient.setQueryData(['study-group-tasks', groupId], (old: any) => {
+        if (!old) return [];
+        return old.filter((t: any) => t.id !== taskId);
+      });
+    },
   });
 }

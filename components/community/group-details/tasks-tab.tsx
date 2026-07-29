@@ -1,19 +1,29 @@
 "use client"
-import { useGroupTasks } from '@/hooks/use-study-groups';
+import { useState } from 'react';
+import { useGroupTasks, useUpdateGroupTask, useDeleteGroupTask, useGroupMembers } from '@/hooks/use-study-groups';
+import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, CheckCircle2, Clock, Circle, CalendarIcon, AlertCircle, Loader2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, CheckCircle2, Clock, Circle, CalendarIcon, AlertCircle, Loader2, Trash2, Edit2, CheckCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
+import { CreateTaskDialog } from './create-task-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreVertical } from 'lucide-react';
 
 interface TasksTabProps {
   groupId: string;
 }
 
 export function TasksTab({ groupId }: TasksTabProps) {
+  const { user } = useAuth();
   const { data: tasks, isLoading } = useGroupTasks(groupId);
+  const { data: members } = useGroupMembers(groupId);
+  const updateTask = useUpdateGroupTask(groupId);
+  const deleteTask = useDeleteGroupTask(groupId);
+
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -39,11 +49,24 @@ export function TasksTab({ groupId }: TasksTabProps) {
     }
   };
 
+  const myRole = members?.find(m => m.author.id === user?.id)?.role;
+  const isAdmin = myRole === 'Admin' || myRole === 'Owner';
+
+  const handleToggleStatus = (task: any) => {
+    const newStatus = task.status === 'Completed' ? 'InProgress' : 'Completed';
+    updateTask.mutate({ taskId: task.id, updates: { status: newStatus } });
+  };
+
+  const handleAssignToMe = (taskId: string) => {
+    if (!user) return;
+    updateTask.mutate({ taskId, updates: { assignee: { ...user, role: user.role.charAt(0).toUpperCase() + user.role.slice(1) } as any } });
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-semibold tracking-tight">Assigned Tasks</h3>
-        <Button className="shadow-sm h-9" variant="outline">
+        <Button className="shadow-sm h-9" variant="outline" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Create Task
         </Button>
@@ -52,10 +75,13 @@ export function TasksTab({ groupId }: TasksTabProps) {
       <div className="space-y-3">
         {tasks && tasks.length > 0 ? (
           tasks.map(task => (
-            <Card key={task.id} className="shadow-none border bg-card/50 hover:bg-card hover:border-primary/50 transition-colors">
+            <Card key={task.id} className={`shadow-none border bg-card/50 hover:bg-card hover:border-primary/50 transition-colors ${task.status === 'Completed' ? 'opacity-70' : ''}`}>
               <CardContent className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="mt-0.5 shrink-0 cursor-pointer">
+                  <div 
+                    className="mt-0.5 shrink-0 cursor-pointer" 
+                    onClick={() => handleToggleStatus(task)}
+                  >
                     {getStatusIcon(task.status)}
                   </div>
                   <div className="space-y-1 min-w-0 flex-1">
@@ -78,7 +104,7 @@ export function TasksTab({ groupId }: TasksTabProps) {
                 <div className="flex items-center gap-3 self-end sm:self-auto sm:ml-0 mt-2 sm:mt-0">
                   {task.assignee ? (
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-7 w-7 border shadow-sm">
+                      <Avatar className="h-7 w-7 border shadow-sm" title={task.assignee.name}>
                         <AvatarImage src={task.assignee.avatarUrl} />
                         <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium">
                           {task.assignee.name.substring(0, 2).toUpperCase()}
@@ -86,7 +112,34 @@ export function TasksTab({ groupId }: TasksTabProps) {
                       </Avatar>
                     </div>
                   ) : (
-                    <Button variant="secondary" size="sm" className="h-7 text-xs">Assign to me</Button>
+                    <Button variant="secondary" size="sm" className="h-7 text-xs" onClick={() => handleAssignToMe(task.id)}>Assign to me</Button>
+                  )}
+                  
+                  {(isAdmin || task.creator?.id === user?.id) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleToggleStatus(task)}>
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          {task.status === 'Completed' ? 'Mark In Progress' : 'Mark Completed'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this task?')) {
+                              deleteTask.mutate(task.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </CardContent>
@@ -100,6 +153,12 @@ export function TasksTab({ groupId }: TasksTabProps) {
           </div>
         )}
       </div>
+
+      <CreateTaskDialog 
+        groupId={groupId} 
+        open={createDialogOpen} 
+        onOpenChange={setCreateDialogOpen} 
+      />
     </div>
   );
 }
