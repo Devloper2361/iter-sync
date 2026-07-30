@@ -1,4 +1,4 @@
-import { GroupMessage } from '@/types/community';
+import { GroupMessage, Attachment } from '@/types/community';
 import { messageRepository } from '@/repositories/message.repository';
 
 export class MessageService {
@@ -8,6 +8,10 @@ export class MessageService {
 
   async sendMessage(groupId: string, message: Omit<GroupMessage, 'id' | 'createdAt'>): Promise<GroupMessage> {
     return messageRepository.sendMessage(groupId, message);
+  }
+
+  async uploadAttachment(file: File): Promise<Attachment> {
+    return messageRepository.uploadAttachment(file);
   }
 }
 

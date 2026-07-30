@@ -77,18 +77,69 @@ export function MessageBubble({ message, isMe }: MessageBubbleProps) {
           {/* Attachments */}
           {message.attachments && message.attachments.length > 0 && (
             <div className="mb-2 space-y-2">
-              {message.attachments.map(att => (
-                <div key={att.id} className={cn(
-                  "flex items-center gap-2 p-2 rounded-lg border text-sm",
-                  isMe ? "bg-primary-foreground/10 border-primary-foreground/20" : "bg-muted/50"
-                )}>
-                  {att.type.startsWith('video') ? <Play className="w-4 h-4 shrink-0" /> :
-                    att.type.startsWith('image') ? <Image src={att.url} alt="" width={100} height={100} className="rounded" /> : 
-                  <FileText className="w-4 h-4 shrink-0" />}
-                  <span className="truncate flex-1 font-medium">{att.name}</span>
-                  <Download className="w-4 h-4 shrink-0 opacity-70 hover:opacity-100 cursor-pointer transition-opacity" />
-                </div>
-              ))}
+              {message.attachments.map(att => {
+                const isImage = att.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(att.name);
+                const isVideo = att.type.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(att.name);
+
+                if (isImage) {
+                  return (
+                    <div key={att.id} className="relative overflow-hidden rounded-lg border bg-black/5 max-w-xs">
+                      {/* Standard img tag to easily handle Blob URLs and remote URLs without Next image domain restrictions */}
+                      <img
+                        src={att.url}
+                        alt={att.name}
+                        className="max-h-60 w-auto object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                        onClick={() => window.open(att.url, '_blank')}
+                      />
+                    </div>
+                  );
+                }
+
+                if (isVideo) {
+                  return (
+                    <div key={att.id} className="relative overflow-hidden rounded-lg border bg-black max-w-xs">
+                      <video
+                        src={att.url}
+                        controls
+                        className="max-h-60 w-full rounded-lg"
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={att.id} className={cn(
+                    "flex items-center gap-3 p-2.5 rounded-lg border text-sm",
+                    isMe ? "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground" : "bg-muted/50 border-border text-foreground"
+                  )}>
+                    <div className={cn(
+                      "p-2 rounded-md shrink-0 flex items-center justify-center",
+                      isMe ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"
+                    )}>
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate text-xs leading-tight">{att.name}</p>
+                      <p className={cn("text-[10px] mt-0.5", isMe ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                        {att.size}
+                      </p>
+                    </div>
+                    <a
+                      href={att.url}
+                      download={att.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        "p-1.5 rounded-md hover:bg-black/10 transition-colors shrink-0",
+                        isMe ? "text-primary-foreground" : "text-foreground"
+                      )}
+                      title="Download file"
+                    >
+                      <Download className="w-4 h-4" />
+                    </a>
+                  </div>
+                );
+              })}
             </div>
           )}
 

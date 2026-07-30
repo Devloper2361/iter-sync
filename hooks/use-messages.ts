@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messageService } from '@/services/message.service';
-import { GroupMessage } from '@/types/community';
+import { GroupMessage, Attachment } from '@/types/community';
 import { getSocket } from '@/lib/socket';
+
+export function useUploadAttachment() {
+  return useMutation({
+    mutationFn: (file: File) => messageService.uploadAttachment(file),
+  });
+}
 
 export function useMessages(groupId: string) {
   const queryClient = useQueryClient();

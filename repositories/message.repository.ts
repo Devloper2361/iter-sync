@@ -1,4 +1,4 @@
-import { GroupMessage } from '@/types/community';
+import { GroupMessage, Attachment } from '@/types/community';
 import { mockGroupMessages } from '@/data/mock-study-groups-db';
 
 export class MessageRepository {
@@ -19,6 +19,19 @@ export class MessageRepository {
     }
     mockGroupMessages[groupId].push(newMessage);
     return newMessage;
+  }
+
+  async uploadAttachment(file: File): Promise<Attachment> {
+    await new Promise(r => setTimeout(r, 500));
+    return {
+      id: `att_${Date.now()}`,
+      name: file.name,
+      size: (file.size / 1024 < 1024) 
+        ? `${(file.size / 1024).toFixed(1)} KB` 
+        : `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      url: URL.createObjectURL(file),
+      type: file.type || 'application/octet-stream'
+    };
   }
 }
 
