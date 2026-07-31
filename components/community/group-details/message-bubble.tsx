@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { GroupMessage } from '@/types/community';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';

@@ -1,1 +1,158 @@
-Starting test compile...
+
+> ai-studio-applet@0.1.0 build
+> NODE_ENV=production next build && npx esbuild server.ts --bundle --platform=node --outfile=dist/server.cjs --external:next --external:socket.io --format=cjs
+
+  ▲ Next.js 14.2.15
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/13) ...
+   Generating static pages (3/13) 
+
+Error occurred prerendering page "/404". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: ENOENT: no such file or directory, open '/app/applet/.next/server/pages-manifest.json'
+    at readFileSync (node:fs:440:20)
+    at loadManifest (/app/applet/node_modules/next/dist/server/load-manifest.js:36:52)
+    at getMaybePagePath (/app/applet/node_modules/next/dist/server/require.js:59:58)
+    at getPagePath (/app/applet/node_modules/next/dist/server/require.js:92:22)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:99:22)
+    at /app/applet/node_modules/next/dist/server/load-components.js:72:65
+    at async Promise.all (index 0)
+    at async loadComponentsImpl (/app/applet/node_modules/next/dist/server/load-components.js:71:33)
+    at async exportPageImpl (/app/applet/node_modules/next/dist/export/worker.js:177:28)
+    at async Span.traceAsyncFn (/app/applet/node_modules/next/dist/trace/trace.js:154:20)
+   Generating static pages (6/13) 
+
+Error occurred prerendering page "/campus". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/(main)/campus/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+
+Error occurred prerendering page "/community". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/(main)/community/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+
+Error occurred prerendering page "/profile". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/(main)/profile/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+   Generating static pages (9/13) 
+
+Error occurred prerendering page "/settings". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/(main)/settings/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+
+Error occurred prerendering page "/marketplace". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/(main)/marketplace/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+
+Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: Cannot find module '/app/applet/.next/server/app/page.js'
+Require stack:
+- /app/applet/node_modules/next/dist/server/require.js
+- /app/applet/node_modules/next/dist/server/load-components.js
+- /app/applet/node_modules/next/dist/build/utils.js
+- /app/applet/node_modules/next/dist/build/worker.js
+- /app/applet/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1430:15)
+    at /app/applet/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+    at Function._load (node:internal/modules/cjs/loader:1216:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1527:12)
+    at mod.require (/app/applet/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:147:16)
+    at requirePage (/app/applet/node_modules/next/dist/server/require.js:109:84)
+ ✓ Generating static pages (13/13)
+
+> Export encountered errors on following paths:
+	/(main)/campus/page: /campus
+	/(main)/community/page: /community
+	/(main)/marketplace/page: /marketplace
+	/(main)/profile/page: /profile
+	/(main)/settings/page: /settings
+	/_error: /404
+	/page: /

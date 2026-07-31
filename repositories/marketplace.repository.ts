@@ -1,74 +1,16 @@
-import { Listing, MarketplaceFilters, MarketplaceCategory } from '@/types/marketplace';
-import { mockListings, marketplaceCategories } from '@/data/mock-marketplace-db';
+import { Listing, MarketplaceFilters, CreateListingInput, Seller } from '@/types/marketplace';
+import { listingRepository } from './listing.repository';
+import { favoriteRepository } from './favorite.repository';
+import { imageRepository } from './image.repository';
+import { marketplaceCategories, sellers } from '@/data/mock-marketplace-db';
 
 export class MarketplaceRepository {
-  private listings = [...mockListings];
-
   async getListings(filters?: MarketplaceFilters): Promise<Listing[]> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    let result = [...this.listings];
-    
-    if (filters) {
-      if (filters.query) {
-        const q = filters.query.toLowerCase();
-        result = result.filter(l => 
-          l.title.toLowerCase().includes(q) || 
-          l.description.toLowerCase().includes(q)
-        );
-      }
-      
-      if (filters.category && filters.category !== 'All') {
-        result = result.filter(l => l.category === filters.category);
-      }
-      
-      if (filters.department) {
-        result = result.filter(l => l.department === filters.department);
-      }
-      
-      if (filters.condition) {
-        result = result.filter(l => l.condition === filters.condition);
-      }
-      
-      if (filters.minPrice !== undefined) {
-        result = result.filter(l => l.price >= filters.minPrice!);
-      }
-      
-      if (filters.maxPrice !== undefined) {
-        result = result.filter(l => l.price <= filters.maxPrice!);
-      }
-      
-      if (filters.sortBy) {
-        switch (filters.sortBy) {
-          case 'newest':
-            result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            break;
-          case 'price_asc':
-            result.sort((a, b) => a.price - b.price);
-            break;
-          case 'price_desc':
-            result.sort((a, b) => b.price - a.price);
-            break;
-          case 'popular':
-            result.sort((a, b) => b.views - a.views);
-            break;
-        }
-      } else {
-        // default sort
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-    }
-
-    return result;
+    return listingRepository.getListings(filters);
   }
 
   async getListingById(id: string): Promise<Listing | undefined> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    const listing = this.listings.find(l => l.id === id);
-    if (listing) {
-      listing.views++; // mock increment views
-    }
-    return listing;
+    return listingRepository.getListingById(id);
   }
 
   async getCategories() {
@@ -77,19 +19,55 @@ export class MarketplaceRepository {
   }
 
   async getFeaturedListings(): Promise<Listing[]> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return this.listings
-      .filter(l => l.status === 'Active')
+    const listings = await listingRepository.getListings({ availableOnly: true });
+    return listings
       .sort((a, b) => b.views - a.views)
-      .slice(0, 4);
+      .slice(0, 6);
   }
 
-  async toggleBookmark(id: string): Promise<void> {
+  async toggleBookmark(id: string): Promise<boolean> {
+    return favoriteRepository.toggleFavorite(id);
+  }
+
+  async getFavorites(): Promise<Listing[]> {
+    return favoriteRepository.getFavorites();
+  }
+
+  async createListing(input: CreateListingInput, currentSeller: Seller): Promise<Listing> {
+    return listingRepository.createListing(input, currentSeller);
+  }
+
+  async updateListing(id: string, updates: Partial<Listing>): Promise<Listing> {
+    return listingRepository.updateListing(id, updates);
+  }
+
+  async deleteListing(id: string): Promise<void> {
+    return listingRepository.deleteListing(id);
+  }
+
+  async markStatus(id: string, status: 'Available' | 'Sold' | 'Reserved'): Promise<Listing> {
+    return listingRepository.markStatus(id, status);
+  }
+
+  async reportListing(id: string): Promise<void> {
+    return listingRepository.reportListing(id);
+  }
+
+  async getRelatedListings(category: string, currentId: string): Promise<Listing[]> {
+    return listingRepository.getRelatedListings(category, currentId);
+  }
+
+  async getSellerProfile(sellerId: string): Promise<Seller | undefined> {
     await new Promise(resolve => setTimeout(resolve, 200));
-    const listing = this.listings.find(l => l.id === id);
-    if (listing) {
-      listing.isBookmarkedByMe = !listing.isBookmarkedByMe;
-    }
+    if (sellers[sellerId]) return sellers[sellerId];
+    // fallback search in listings
+    const listings = await listingRepository.getListings();
+    const listing = listings.find(l => l.seller.id === sellerId);
+    return listing?.seller;
+  }
+
+  async uploadImages(files: File[]): Promise<string[]> {
+    return imageRepository.uploadImages(files);
   }
 }
 

@@ -32,7 +32,7 @@ app.prepare().then(() => {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
-
+    
     socket.on('joinGroup', (groupId) => {
       socket.join(groupId);
       console.log(`Socket ${socket.id} joined group ${groupId}`);
@@ -43,40 +43,8 @@ app.prepare().then(() => {
       console.log(`Socket ${socket.id} left group ${groupId}`);
     });
 
-    // Chat Events
     socket.on('sendMessage', (data) => {
-      // Broadcast MessageCreated to all EXCEPT sender
       socket.to(data.groupId).emit('MessageCreated', data.message);
-    });
-
-    socket.on('startTyping', (data) => {
-      socket.to(data.groupId).emit('TypingStarted', data);
-    });
-
-    socket.on('stopTyping', (data) => {
-      socket.to(data.groupId).emit('TypingStopped', data);
-    });
-    
-    // Group Events
-    socket.on('createGroup', (data) => {
-      // Broadcast to everyone so they can see the new group instantly
-      socket.broadcast.emit('StudyGroupCreated', data);
-    });
-
-    socket.on('joinMember', (data) => {
-      io.to(data.groupId).emit('MemberJoined', data);
-    });
-
-    socket.on('leaveMember', (data) => {
-      io.to(data.groupId).emit('MemberLeft', data);
-    });
-    
-    socket.on('createTask', (data) => {
-      socket.to(data.groupId).emit('TaskCreated', data);
-    });
-    
-    socket.on('uploadResource', (data) => {
-      socket.to(data.groupId).emit('ResourceUploaded', data);
     });
 
     socket.on('disconnect', () => {

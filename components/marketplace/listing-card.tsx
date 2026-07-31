@@ -1,3 +1,4 @@
+"use client";
 import { Listing } from '@/types/marketplace';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

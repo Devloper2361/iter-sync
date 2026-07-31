@@ -1,0 +1,48 @@
+
+> ai-studio-applet@0.1.0 build
+> NODE_ENV=production next build && npx esbuild server.ts --bundle --platform=node --outfile=dist/server.cjs --external:next --external:socket.io --format=cjs
+
+  ▲ Next.js 14.2.15
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/13) ...
+   Generating static pages (3/13) 
+   Generating static pages (6/13) 
+   Generating static pages (9/13) 
+ ✓ Generating static pages (13/13)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    178 B          94.3 kB
+├ ○ /_not-found                          880 B          88.2 kB
+├ ○ /academics                           11.7 kB         155 kB
+├ ○ /ai-assistant                        155 B          87.5 kB
+├ ○ /campus                              155 B          87.5 kB
+├ ○ /community                           16.8 kB         357 kB
+├ ƒ /community/club/[id]                 9.96 kB         279 kB
+├ ƒ /community/group/[id]                15.5 kB         215 kB
+├ ƒ /community/post/[id]                 8.03 kB         282 kB
+├ ƒ /community/question/[id]             8.26 kB         290 kB
+├ ○ /dashboard                           6.05 kB         127 kB
+├ ○ /login                               2.29 kB         126 kB
+├ ○ /marketplace                         10.7 kB         190 kB
+├ ƒ /marketplace/listing/[id]            10.2 kB         197 kB
+├ ○ /profile                             155 B          87.5 kB
+└ ○ /settings                            155 B          87.5 kB
++ First Load JS shared by all            87.3 kB
+  ├ chunks/2117-22678949cf2d6233.js      31.8 kB
+  ├ chunks/fd9d1056-ea14d6d6ad8ca5b4.js  53.6 kB
+  └ other shared chunks (total)          1.91 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+  dist/server.cjs  3.4kb
+
+⚡ Done in 4ms

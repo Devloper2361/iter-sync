@@ -16,6 +16,7 @@ export type ItemCondition = 'New' | 'Like New' | 'Good' | 'Fair' | 'Poor';
 
 export type SortOption = 
   | 'newest' 
+  | 'oldest'
   | 'price_asc' 
   | 'price_desc' 
   | 'popular';
@@ -41,8 +42,27 @@ export interface Listing {
   location: string;
   createdAt: string;
   views: number;
+  negotiable?: boolean;
+  tags?: string[];
   isBookmarkedByMe?: boolean;
-  status: 'Active' | 'Sold' | 'Reserved';
+  status: 'Available' | 'Sold' | 'Reserved';
+  isDraft?: boolean;
+  reported?: boolean;
+}
+
+export interface CreateListingInput {
+  title: string;
+  description: string;
+  category: MarketplaceCategory;
+  condition: ItemCondition;
+  price: number;
+  originalPrice?: number;
+  negotiable?: boolean;
+  images: string[];
+  location: string;
+  department?: string;
+  tags?: string[];
+  isDraft?: boolean;
 }
 
 export interface MarketplaceFilters {
@@ -53,4 +73,9 @@ export interface MarketplaceFilters {
   minPrice?: number;
   maxPrice?: number;
   sortBy?: SortOption;
+  availableOnly?: boolean;
+  negotiableOnly?: boolean;
+  savedOnly?: boolean;
+  sellerId?: string;
 }
+

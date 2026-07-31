@@ -1,3 +1,4 @@
+"use client";
 import { MarketplaceCategory } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';

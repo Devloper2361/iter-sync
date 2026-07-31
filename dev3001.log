@@ -1,0 +1,12 @@
+
+> ai-studio-applet@0.1.0 dev
+> tsx server.ts
+
+> Ready on http://localhost:3000
+ ○ Compiling / ...
+ ✓ Compiled / in 7.5s (640 modules)
+ HEAD / 200 in 7895ms
+ ✓ Compiled in 952ms (321 modules)
+ ○ Compiling /marketplace ...
+ ✓ Compiled /marketplace in 4.3s (962 modules)
+ HEAD /marketplace 200 in 4605ms
