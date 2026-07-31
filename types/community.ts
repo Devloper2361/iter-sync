@@ -252,3 +252,8 @@ export interface CommunityNotification {
   createdAt: string;
   linkId?: string;
 }
+
+export interface DirectConversation {
+  id: string;
+  participants: string[];
+}

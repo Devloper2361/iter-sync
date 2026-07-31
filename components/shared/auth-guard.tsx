@@ -21,11 +21,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [isClient, isAuthenticated, router, pathname]);
 
   if (!isClient) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><p>Loading...</p></div>;
+    return null;
   }
 
   if (!isAuthenticated || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><p>Redirecting...</p></div>;
+    return null;
   }
 
   return <>{children}</>;

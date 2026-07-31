@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMarketplaceListing, useToggleBookmark, useMarkStatus, useDeleteListing, useReportListing, useRelatedListings } from '@/hooks/use-marketplace';
 import { useAuth } from '@/hooks/use-auth';
+import { useDirectConversation } from '@/hooks/use-conversation';
 import { ArrowLeft, MapPin, Heart, Share2, Tag, Info, AlertTriangle, MessageSquare, Edit, Trash2, CheckCircle, Flag, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export default function ListingDetailsPage({ params }: { params: { id: string } 
   const markStatus = useMarkStatus();
   const deleteListing = useDeleteListing();
   const reportListing = useReportListing();
+  const directConversation = useDirectConversation();
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -107,7 +109,18 @@ export default function ListingDetailsPage({ params }: { params: { id: string } 
   };
 
   const handleChatSeller = () => {
-    router.push('/community/group/g1');
+    if (!listing) return;
+    directConversation.mutate(
+      { currentUserId, sellerId: listing.seller.id },
+      {
+        onSuccess: (conversation) => {
+          router.push(`/community/messages/${conversation.id}`);
+        },
+        onError: () => {
+          toast.error("Failed to open chat with seller.");
+        }
+      }
+    );
   };
 
   return (

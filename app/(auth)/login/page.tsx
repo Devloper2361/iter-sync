@@ -21,9 +21,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const { login, isAuthenticated } = useAuth();
   
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => setIsClient(true), []);
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -33,10 +30,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (isClient && isAuthenticated) {
+    if (isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [isClient, isAuthenticated, router]);
+  }, [isAuthenticated, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
     setError('');
@@ -49,8 +46,6 @@ export default function LoginPage() {
       setError('Invalid credentials. Try student@iter.edu');
     }
   };
-
-  if (!isClient) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
